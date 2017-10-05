@@ -32,21 +32,21 @@ except ImportError:
 SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
 CLIENT_SECRET_FILE = 'client_secret.json'
 APPLICATION_NAME = 'Tronlab Registration Application'
-COORDINATOR_EMAIL = 'tronlab.coordinator@gmail.com'
-PASSWORD = 'Mechatronics2010'
+COORDINATOR_EMAIL = 'coordinator_email'
+PASSWORD = 'password'
 
 """
 Setting Variables
 """
-SPREADSHEET_ID = '1xhiyMpNMcaolPF6UdTY4m5krlJpiAWHK3gNZwnURLHQ'
-DEST_EMAIL = 'tronlab.coordinator@gmail.com'             #coordinator email - sends email to this acc
+SPREADSHEET_ID = 'SpreadsheetID'
+DEST_EMAIL = 'destination_email'             #coordinator email - sends email to this acc
 COLS_WITHOUT_CHK = 18                                           #total num of col w/o added check
 FLAG_INDEX = 18                                                 #check col index
 NAMES_INDEX = 13                                                #name col index
 STUDENT_NUM_INDEX = 15                                          #student num index
 DEPARTMENT_INDEX = 14                                           #program and year index
 SCORE_INDEX = 16                                                #quiz score index
-FORM_ID = 'Form Responses 1'                                    #form id /see below spreadsheet pg, the tab/
+FORM_ID = 'SheetID'                                    #form id /see below spreadsheet pg, the tab/
 CHK_COL_ID = 'S'                                                #form value for check col
 PASS_VALUE = 'x'                                                #pass/fail value to insert
 FAIL_VALUE = 'o'
