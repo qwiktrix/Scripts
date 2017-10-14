@@ -17,15 +17,15 @@ import httplib2
 import os
 import smtplib
 
-from apiclient import discovery
-from oauth2client import client
-from oauth2client import tools
+import discovery
+import client
+import tools
 from oauth2client.file import Storage
 from email.mime.text import MIMEText
 
 try: 
     import argparse
-    flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
+    flags = argparse.ArgumentParser(parents=[oauth2client.tools.argparser]).parse_args()
 except ImportError:
     flags = None
     
@@ -39,14 +39,16 @@ PASSWORD = 'password'
 Setting Variables
 """
 SPREADSHEET_ID = 'SpreadsheetID'
-DEST_EMAIL = 'destination_email'             #coordinator email - sends email to this acc
+DEST_EMAIL = 'destination_email'                                #coordinator email - sends email to this acc
+AUTHOR = 'Jessa'                                                #coordinator name           
+EMAIL_SUBJECT = 'Tronlab Access Confirmation'                   #email subject 
 COLS_WITHOUT_CHK = 18                                           #total num of col w/o added check
 FLAG_INDEX = 18                                                 #check col index
 NAMES_INDEX = 13                                                #name col index
 STUDENT_NUM_INDEX = 15                                          #student num index
 DEPARTMENT_INDEX = 14                                           #program and year index
 SCORE_INDEX = 16                                                #quiz score index
-FORM_ID = 'SheetID'                                    #form id /see below spreadsheet pg, the tab/
+FORM_ID = 'SheetID'                                             #form id /see below spreadsheet pg, the tab/
 CHK_COL_ID = 'S'                                                #form value for check col
 PASS_VALUE = 'x'                                                #pass/fail value to insert
 FAIL_VALUE = 'o'
@@ -62,34 +64,36 @@ def get_credentials():
     credentials = store.get()
     
     if not credentials or credentials.invalid:
-        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
+        flow = oauth2client.client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
         flow.user_agent = APPLICATION_NAME
         if flags:
-            credentials = tools.run_flow(flow, store, flags)
+            credentials = oauth2client.tools.run_flow(flow, store, flags)
         else:
-            credentials = tools.run_flow(flow, store)
+            credentials = oauth2client.tools.run_flow(flow, store)
         print('Storing credentials to' + credential_path)
     return credentials
 
+
+# Checking the entry score is perfect
+# NOTE: student may only have access IF a perfect score is attained
 def isValid(chunk):
     if (chunk[SCORE_INDEX] == '10 / 10'):
         return True
     else:
         return False
 
+
 def chk_extraction():
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
     discoveryURL = ('https://sheets.googleapis.com/$discovery/rest?'
                     'version=v4')
-    service = discovery.build('sheets','v4', http=http, discoveryServiceUrl=discoveryURL)
+    service = apiclient.discovery.build('sheets','v4', http=http, discoveryServiceUrl=discoveryURL)
     rangeName= FORM_ID+'!A2:S'
     result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID,range=rangeName).execute()
     values = result.get('values', [])
     
-    emailChunk = []
-    emailList = []
-    failedList = []
+    emailChunk, emailList, failedList = [], [], []
         
     if not values:
         print('No data found.')
@@ -107,14 +111,18 @@ def chk_extraction():
 
         extract = [emailChunk, emailList, failedList]
         return extract
-                           
-    
+                
+
+# Checks whether extration if all students have not been accounted for
+# if so not necessary to email 
 def isEmpty(chunk):
     if (len(chunk[0]) == 0):
         return True
     else:
         return False 
 
+# Formatting the data from spreadsheet {Name, Student Number, Department/Year} into columns for email chunk
+# with proper padding
 def formatChunk(Extraction):
         MaxNameLen = 0
         MaxStNumLen = 15
@@ -129,11 +137,16 @@ def formatChunk(Extraction):
         chunk = 'Name:' + (MaxNameLen - 3) * ' ' + '\t\tStudent Number:\t\t\tDepartment:\n' + studentData 
         return chunk
 
+# Using SMTP email string with formatted student information as provided by formatChunk
+#
+# INPUTS    {  
+#               students    =   formatted text of student data {Name, Student Number, Department/Year}
+#           }
 def email(students):
-    emailString = '<html><pre><font size= 3>Hello!\r\nThese are the students that need to be updated to have access to the Tronlab.\r\n\r\n' + students + '\r\nThank you.\r\nRegards,\r\nJessa</font></pre></html>'
+    emailString = '<html><pre><font size= 3>Hello!\r\nThese are the students that need to be updated to have access to the Tronlab.\r\n\r\n' + students + '\r\nThank you.\r\nRegards,\r\n' + AUTHOR + '</font></pre></html>'
     
     msg = MIMEText(emailString,'html')
-    msg['Subject'] = 'Tronlab Access Confirmation'
+    msg['Subject'] = EMAIL_SUBJECT
     msg['To'] = COORDINATOR_EMAIL
     
     smtpObj = smtplib.SMTP('smtp.gmail.com', 587)
@@ -142,16 +155,24 @@ def email(students):
     smtpObj.login(COORDINATOR_EMAIL, PASSWORD)
     smtpObj.sendmail(COORDINATOR_EMAIL, DEST_EMAIL , msg.as_string())
     smtpObj.quit()
-    
+
+# Updates spreadsheet with marker in column referenced by "CHK_COL_ID" 
+# using Google Spreadsheets API (note single cell write)
+#
+# INPUTS   {    
+#               target  = spreadsheet cell to update 
+#               flag    = character to fill in spreadsheet {PASS_VALUE, FAIL_VALUE}, as defined above          
+#          }
 def updateSheet(target,flag):
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
     discoveryURL = ('https://sheets.googleapis.com/$discovery/rest?'
                     'version=v4')
-    service = discovery.build('sheets','v4', http=http, discoveryServiceUrl=discoveryURL)
+    service = apiclient.discovery.build('sheets','v4', http=http, discoveryServiceUrl=discoveryURL)
     rangeName = target
     valueBody = { "values": [[flag]]}
     update = service.spreadsheets().values().update(spreadsheetId=SPREADSHEET_ID,range=rangeName, valueInputOption='RAW', body=valueBody).execute()
+    
     
 def writeTo(indexList,flag):
         for i in range(len(indexList)):
