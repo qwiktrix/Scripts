@@ -82,7 +82,9 @@ def isValid(chunk):
     else:
         return False
 
-
+# Checks document for all spreadsheet records that have not been accounted for, either that have not been emailed
+# or marked as fail on spreadsheet document. If PASS {Name, Student Num, Department} extracted and added to emailChunk 
+# and spreadsheet record index added to emailList, if FAIL index added to failedList
 def chk_extraction():
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
@@ -98,10 +100,12 @@ def chk_extraction():
     if not values:
         print('No data found.')
     else:       
+        # Checks and extracts for records that have not been checked no "Emailed" spreadsheet value, dictated by COLS_WITHOUT_CHK definition
         for i in range(len(values)):
             if (len(values[i]) == COLS_WITHOUT_CHK):
                 studentRecord = values[i]
                 
+                # Check for score to be perfect
                 if (isValid(studentRecord)):
                     studentChunk = [studentRecord[NAMES_INDEX], studentRecord[STUDENT_NUM_INDEX], studentRecord[DEPARTMENT_INDEX]] 
                     emailChunk.append(studentChunk)
@@ -114,7 +118,7 @@ def chk_extraction():
                 
 
 # Checks whether extration if all students have not been accounted for
-# if so not necessary to email 
+# if so not necessary to email or if any failed scores students to update the sheet
 def isEmpty(chunk):
     if (len(chunk[0]) == 0):
         return True
@@ -173,7 +177,12 @@ def updateSheet(target,flag):
     valueBody = { "values": [[flag]]}
     update = service.spreadsheets().values().update(spreadsheetId=SPREADSHEET_ID,range=rangeName, valueInputOption='RAW', body=valueBody).execute()
     
-    
+# Iterates through indexList to update all necessary cells with a emailed flag value
+#
+# INPUTS   {    
+#               indexList  = list of indexes of record that have to be updated b/w {emailList, failList} see chk_extraction
+#               flag    = character to fill in spreadsheet {PASS_VALUE, FAIL_VALUE}, as defined above          
+#          }
 def writeTo(indexList,flag):
         for i in range(len(indexList)):
             upd_cell = FORM_ID + '!' + CHK_COL_ID + str(indexList[i])
