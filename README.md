@@ -1,5 +1,5 @@
-# Scripts
-=========
-
-Current Scripts:
-...- Tronlab Access Registration Updater  ...- Webtoon New Chap Checker/Opener
+## Scripts
+--------------
+#### Currently in Repo:
+* Tronlab Access Registration  Updater/Auto Emailer
+*  Webtoon New Chapter Checker and Opener
