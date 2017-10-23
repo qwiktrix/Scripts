@@ -26,7 +26,7 @@ _index.xml_ should follow this format:
 
 ```
 where,
-```
+```html
 <!-- Webtoon Link-->
 <base_url>/<language_id>/<genre>/<name>/ep-<ep_no>/viewer?title_no=<title_no>&episode_no=<episode_no>
 ```

@@ -40,7 +40,7 @@ Setting Variables
 """
 SPREADSHEET_ID = 'SpreadsheetID'
 DEST_EMAIL = 'destination_email'                                #coordinator email - sends email to this acc
-AUTHOR = 'Jessa'                                                #coordinator name           
+AUTHOR = 'Tronlab Coordinator Name'                                                #coordinator name           
 EMAIL_SUBJECT = 'Tronlab Access Confirmation'                   #email subject 
 COLS_WITHOUT_CHK = 18                                           #total num of col w/o added check
 FLAG_INDEX = 18                                                 #check col index
