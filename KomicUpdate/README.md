@@ -1,5 +1,4 @@
 # Webtoon/Comic Update Checker
---------------------------------
 A python 2.7 script to check updates on manga, comics, webtoons and opens if available. 
 
 Currently only compatible with [webtoons.com](http://www.webtoons.com/)
@@ -8,15 +7,15 @@ __Usage:__
 ```
 python komicupdate.py
 ```
----
+
 __Required dependencies:__
-* 'index.xml' file in directory
+* _index.xml_ file in directory
 * lxml (3.8.0)
 * requests (2.18.4)
 * xmltodict (0.11.0) 
 
-index.xml should follow this format:
-```
+_index.xml_ should follow this format:
+```xml
 <?xml version="1.0"?>
 <list>
 	<comic name="<name>" title="<title_no>" genre="<genre>" language="<language_id>" type="<type_id>">
@@ -34,15 +33,16 @@ where,
 
 ---
 
-###__Timeline:__
+#### Timeline:
 
 _Last Updated:_ Oct 23, 2017
 
 10/21/17 - Initial creation, currently only compatible for webtoon.com
+
 10/23/17 - Re-implemented with xmltodict
 
 -------
-####__TO DO:__
+#### TO DO:
 - Check for empty 'input.xml' prior to comic iteration
 - Create a logger class
 - Separate code into other files
